@@ -39,21 +39,36 @@ public_users.get('/isbn/:isbn', function (req, res) {
 // Get book details based on author
 public_users.get('/author/:author', function (req, res) {
     //Write your code here
-    const bookAuthor = req.params.author
-    if(!bookAuthor) {
-        return res.status(400).json({message: "Please enter a valid author!"})
+    let ans = []
+    for(const [key, values] of Object.entries(books)){
+        const book = Object.entries(values);
+        for(let i = 0; i < book.length ; i++){
+            if(book[i][0] == 'author' && book[i][1] == req.params.author){
+                ans.push(books[key]);
+            }
+        }
     }
-    res.send(books[bookAuthor])
+    if(ans.length == 0){
+        return res.status(300).json({message: "Author not found"});
+    }
+    res.send(ans);
 });
 
 // Get all books based on title
 public_users.get('/title/:title', function (req, res) {
-    //Write your code here
-    const bookTitle = req.params.author
-    if(!bookTitle) {
-        return res.status(400).json({message: "Please enter a valid title!"})
+    let ans = []
+    for(const [key, values] of Object.entries(books)){
+        const book = Object.entries(values);
+        for(let i = 0; i < book.length ; i++){
+            if(book[i][0] == 'title' && book[i][1] == req.params.title){
+                ans.push(books[key]);
+            }
+        }
     }
-    res.send(books[bookTitle])
+    if(ans.length == 0){
+        return res.status(300).json({message: "Title not found"});
+    }
+    res.send(ans);
 });
 
 //  Get book review
