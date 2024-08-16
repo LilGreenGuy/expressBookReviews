@@ -4,6 +4,8 @@ let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
+
+// Task 6
 public_users.post("/register", (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
@@ -22,23 +24,25 @@ public_users.post("/register", (req, res) => {
     return res.status(404).json({ message: "Unable to register user." });
 });
 
-// Get the book list available in the shop
-// public_users.get('/', async function (req, res) {
-//     res.send(JSON.stringify(books, null, 4))
-// });
-
 const bookPromise = new Promise((resolve, reject) => {
     resolve(books)
 })
 
+// Task 1
+// public_users.get('/', async function (req, res) {
+//     res.send(JSON.stringify(books, null, 4))
+// });
+
+
+// Task 10
 public_users.get('/', async function (req, res) {
     await bookPromise.then(
-    (book) => res.send(JSON.stringify(book, null, 4)),
-    (error) => res.send(error)
+        (book) => res.send(JSON.stringify(book, null, 4)),
+        (error) => res.send(error)
     )
 });
 
-
+// Task 2
 // Get book details based on ISBN
 // public_users.get('/isbn/:isbn', function (req, res) {
 //     const bookISBN = req.params.isbn
@@ -48,77 +52,88 @@ public_users.get('/', async function (req, res) {
 //     res.send(books[bookISBN]);
 // });
 
+
+// Task 11
 public_users.get('/isbn/:isbn', function (req, res) {
     const isbn = req.params.isbn
     bookPromise.then(
         (book) => res.send(book[isbn]),
         (error) => res.send(error)
     )
-    if(!books[isbn]) {
-        return res.status(400).json({message: "Please enter a valid number!"})
+    if (!books[isbn]) {
+        return res.status(400).json({ message: "Please enter a valid number!" })
     }
 });
 
+// Task 3
 // Get book details based on author
 // public_users.get('/author/:author', function (req, res) {
-    // let answer = [];
-    // for(let book in books) {
-    //     if(books[book].author === req.params.author) {
-    //         answer.push(books[book]);
-    //     }
-    // }
-    // res.send(answer);
+//     let answer = [];
+//     for(let book in books) {
+//         if(books[book].author === req.params.author) {
+//             answer.push(books[book]);
+//         }
+//     }
+// if(answer.length == 0){
+//     return res.status(300).json({message: "Author not found!"});
+// }
+//     res.send(answer);
 // });
 
-public_users.get('/author/:author', function (req, res) {
+
+// Task 12
+public_users.get('/author/:author', async function (req, res) {
+    let author = req.params.author
     let answer = [];
-    for(let book in books) {
-        if(books[book].author === req.params.author) {
-            answer.push(books[book]);
+    await bookPromise.then((book) => {
+        for (let isbn in book) {
+            if (books[isbn].author === author) {
+                answer.push(books[isbn]);
+            }
         }
-    }    
-    if(answer.length == 0){
-        return res.status(300).json({message: "Title not found"});
-    }
-    res.send(answer);
+    }).then((success) => {
+        if (answer.length === 0) {
+            return res.status(300).json({ message: "Author not found!" })
+        } else {
+            return res.send(answer)
+        }
+    });
 });
 
+// Task 4
 // Get all books based on title
-public_users.get('/title/:title', function (req, res) {
-    //Write your code here 
-    let answer = [];
-    for(let book in books) {
-        if(books[book].title === req.params.title) {
-            answer.push(books[book]);
+// public_users.get('/title/:title', function (req, res) {
+//     //Write your code here 
+//     for(let book in books) {
+//         if(books[book].title === req.params.title) {
+//             return res.send(books[book])
+//         }
+//     }
+//         return res.status(300).json({message: "Title not found!"});
+// });
+
+
+// Task 13
+public_users.get('/title/:title', async function (req, res) {
+    let title = req.params.title
+    await bookPromise.then((books) => {
+        for (let isbn in books) {
+            if (books[isbn].title === title) {
+                return res.send(books[isbn])
+            }
         }
-    }
-    if(answer.length == 0){
-        return res.status(300).json({message: "Title not found"});
-    }
-    res.send(answer);
+        return res.status(300).json({ message: "Title not found!" });
+    })
 });
 
+// Task 5
 //  Get book review
 public_users.get('/review/:isbn', function (req, res) {
     const bookISBN = req.params.isbn
-    if(!bookISBN) {
-        return res.status(400).json({message: "Please enter a valid number!"})
+    if (!bookISBN) {
+        return res.status(400).json({ message: "Please enter a valid number!" })
     }
     res.send(books[bookISBN].reviews)
 });
 
 module.exports.general = public_users;
-
-
-// let books = {
-//     1: {"author": "Chinua Achebe","title": "Things Fall Apart", "reviews": {} },
-//     2: {"author": "Hans Christian Andersen","title": "Fairy tales", "reviews": {} },
-//     3: {"author": "Dante Alighieri","title": "The Divine Comedy", "reviews": {} },
-//     4: {"author": "Unknown","title": "The Epic Of Gilgamesh", "reviews": {} },
-//     5: {"author": "Unknown","title": "The Book Of Job", "reviews": {} },
-//     6: {"author": "Unknown","title": "One Thousand and One Nights", "reviews": {} },
-//     7: {"author": "Unknown","title": "Nj\u00e1l's Saga", "reviews": {} },
-//     8: {"author": "Jane Austen","title": "Pride and Prejudice", "reviews": {} },
-//     9: {"author": "Honor\u00e9 de Balzac","title": "Le P\u00e8re Goriot", "reviews": {} },
-//     10: {"author": "Samuel Beckett","title": "Molloy, Malone Dies, The Unnamable, the trilogy", "reviews": {} }
-// }
